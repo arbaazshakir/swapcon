@@ -1,5 +1,6 @@
 from app import db
 from datetime import datetime
+from hashlib import md5
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -13,6 +14,7 @@ class User(db.Model):
     created = db.Column(db.DateTime())
     contacts = db.relationship('Contact', backref='user', order_by="Contact.id", lazy='dynamic')
     tasks = db.relationship('Task', backref='user', order_by="Task.id",lazy='dynamic')
+    #profile_image_url = db.Column(db.String(400))
 
     @property
     def is_authenticated(self):

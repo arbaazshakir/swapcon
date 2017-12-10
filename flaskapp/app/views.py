@@ -252,3 +252,8 @@ def edit_task(task_id):
                         title='Edit Task',
                         user=current_user,
                         form=form)
+
+# @app.route('/profile')
+# @login_required
+# def profile():
+#   
