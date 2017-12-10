@@ -21,6 +21,18 @@ class RegistrationForm(Form):
     first_name = StringField('first_name', validators=[DataRequired()])
     last_name = StringField('last_name', validators=[DataRequired()])
     accept_tos = BooleanField('I accept the TOS', [DataRequired()])
+    profile_image_url = StringField('profile_image_url')
+    pg_choices = [('get_job', 'Get a Job!'), ('meet_people', 'Meet People'), 
+    ('find_mentor','Find a Mentor')]
+    primary_goal = SelectField('primary_goal', choices=pg_choices, coerce=str)
+
+class EditProfileForm(Form):
+    first_name = StringField('first_name', validators=[DataRequired()])
+    last_name = StringField('last_name', validators=[DataRequired()])
+    profile_image_url = StringField('profile_image_url')
+    pg_choices = [('get_job', 'Get a Job!'), ('meet_people', 'Meet People'), 
+    ('find_mentor','Find a Mentor')]
+    primary_goal = SelectField('primary_goal', choices=pg_choices, coerce=str)
 
 class ContactForm(Form):
     first_name = StringField('first_name', validators=[DataRequired()])
@@ -55,3 +67,28 @@ class TaskForm(Form):
     relevant_contact = SelectField('contact', coerce=int, choices=[(-1, "None / NA")], validators=[Optional()])
     is_done = BooleanField('is_done')
 
+class GoalForm(Form):
+    goal_types = [('messages', 'Send Messages/Followups'),
+                ('new contacts','New Contacts'),
+                ('meetings', 'Meetings'),
+                ('events','Attend Events')]
+    goal_periods = [('day','Daily'),('week','Weekly'),('month','Monthly'),('completion', 'Until Completed (Once).')]
+
+    goal_type = SelectField('goal_type', choices=goal_types)
+    goal_period = SelectField('goal_period', choices=goal_periods)
+    goal_target = IntegerField('goal_target', default=1)
+    current_count = IntegerField('current_count', default=0)
+
+
+class EditGoalForm(Form):
+    goal_types = [('messages', 'Send Messages/Followups'),
+                ('new contacts','New Contacts'),
+                ('meetings', 'Meetings'),
+                ('events','Attend Events')]
+    goal_periods = [('day','Daily'),('week','Weekly'),('month','Monthly'),('completion', 'Until Completed (Once).')]
+
+    goal_type = SelectField('goal_type', choices=goal_types)
+    goal_period = SelectField('goal_period', choices=goal_periods)
+    goal_target = IntegerField('goal_target', default=1)
+    current_count = IntegerField('current_count', default=0)
+    remove = BooleanField('remove')

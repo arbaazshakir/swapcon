@@ -3,17 +3,17 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
 from .forms import *
-from .models import User, Contact, Task
+from .models import User, Contact, Task, Goal
 import sqlalchemy
 from time import sleep
 
 def earliest_x_tasks(x, tasks):
   #e.g. x=5, gets the first five
-  tasksByDate = sorted(tasks, key=lambda task: task.due_date)
+  tasksByDate = sorted(tasks, key=lambda task: task.due_date.timestamp())
   return tasksByDate[:min(len(tasks),x)]
 
 def last_x_tasks(x, tasks):
-  tasksByDate = sorted(tasks, key=lambda task: task.due_date, reverse=True)
+  tasksByDate = sorted(tasks, key=lambda task: task.due_date.timestamp(), reverse=True)
   return tasksByDate[:min(len(tasks),x)]
 
 @lm.user_loader
@@ -43,7 +43,8 @@ def index():
                            active_tasks=active_tasks,
                            num_tasks=len(active_tasks),
                            inactive_tasks=inactive_tasks,
-                           num_inactive_tasks=len(inactive_tasks))
+                           num_inactive_tasks=len(inactive_tasks),
+                           goals=list(current_user.goals))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -80,7 +81,9 @@ def register():
           user = User(form.email.data,
                       form.password.data,
                       form.first_name.data,
-                      form.last_name.data)
+                      form.last_name.data,
+                      form.profile_image_url.data,
+                      form.primary_goal.data)
           db.session.add(user)
           db.session.commit()
           flash('Thanks for registering')
@@ -239,6 +242,16 @@ def edit_task(task_id):
     task.contact_id = int(form.relevant_contact.data)
     if task.contact_id != -1:
       task.contact_name = Contact.query.get(task.contact_id).full_name()
+
+    #see if action is being completed
+    if not task.is_done and form.is_done.data:
+      #track update into goals if applicable
+      goals = []
+      for goal in current_user.goals:
+        if goal.is_active and (task.task_type in goal.goal_type):
+          #in because e.g. task_type can be 'meeting' and goal_type can be 'meetings'
+          goal.current_count += 1
+
     task.is_done = form.is_done.data
     db.session.commit()
     flash("Task updated successfully")
@@ -253,7 +266,83 @@ def edit_task(task_id):
                         user=current_user,
                         form=form)
 
-# @app.route('/profile')
-# @login_required
-# def profile():
-#   
+@app.route('/profile')
+@login_required
+def profile():
+  return render_template('profile.html',
+                        title='Profile',
+                        user=current_user,
+                        goals=list(current_user.goals))
+
+@app.route('/profile/edit', methods=['GET','POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if request.method == 'POST' and form.validate():
+      current_user.first_name = form.first_name.data
+      current_user.last_name = form.last_name.data
+      current_user.profile_image_url =form.profile_image_url.data
+      current_user.primary_goal = form.primary_goal.data
+      db.session.commit()
+      flash('Profile Successfully Updated!')
+      return redirect(url_for('profile'))
+
+    form.first_name.data = current_user.first_name
+    form.last_name.data = current_user.last_name
+    form.profile_image_url.data = current_user.profile_image_url
+    key_choices = [x[0] for x in form.primary_goal.choices]
+    if current_user.primary_goal in key_choices:
+      form.primary_goal.data = current_user.primary_goal
+    return render_template('edit_profile.html',
+                          title='Edit Profile',
+                          user=current_user,
+                          form=form)
+
+@app.route('/goals/')
+@login_required
+def goals():
+  return render_template('goals.html',
+                        title='View Goals',
+                        user=current_user,
+                        goals=list(current_user.goals))
+
+@app.route('/goals/add', methods=['GET','POST'])
+@login_required
+def add_goal():
+  form = GoalForm()
+  if request.method == 'POST' and form.validate():
+    g = Goal(current_user.id,
+            form.goal_type.data,
+            form.goal_period.data,
+            form.goal_target.data,
+            form.current_count.data)
+    db.session.add(g)
+    db.session.commit()
+    return redirect(url_for('index'))
+  return render_template('add_goal.html',
+                        title='Add Goal',
+                        user=current_user,
+                        form=form)
+
+@app.route('/goals/<goal_id>/edit', methods=['GET','POST'])
+@login_required
+def edit_goal(goal_id):
+  g = Goal.query.get(int(goal_id))
+  form = EditGoalForm()
+  if request.method == 'POST' and form.validate():
+    g.goal_type = form.goal_type.data
+    g.goal_period = form.goal_period.data
+    g.goal_target = form.goal_target.data
+    g.current_count = form.current_count.data
+    g.is_active = (not form.remove.data)
+    db.session.add(g)
+    db.session.commit()
+    return redirect(url_for('index'))
+  form.goal_type.data = g.goal_type
+  form.goal_period.data = g.goal_period
+  form.goal_target.data = g.goal_target
+  form.current_count.data = g.current_count
+  return render_template('edit_goal.html',
+                        title="Edit Goal",
+                        user=current_user,
+                        form=form)

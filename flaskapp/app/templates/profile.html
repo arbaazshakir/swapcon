@@ -1,0 +1,23 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hi, {{ user.first_name }}!</h1><span><a href="/profile/edit">Edit Profile</a></span><br>
+    <img src="{{user.profile_image_url}}" alt='profile' style="size: 100">
+    <h3>Your Profile</h3>
+    <p>First Name: {{user.first_name}}</p>
+    <p>Last Name: {{user.last_name}}</p>
+    <p>Email: {{user.email}}</p>
+    <p>Password: (Not shown) </p>
+    <p>Profile URL: {{user.profile_image_url}}</p>
+    <p>Primary Goal: {{user.get_primary_goal_text()}}</p>
+    <p>Sub Goals: 
+    <ul>
+    {% for goal in goals %}
+        {% if goal.is_active %}
+            <li>{{goal.__repr__()|safe}} <a href={{goal.></a></li>
+        {% endif %}    
+    {% endfor %}
+    </ul>
+    </p>
+{% endblock %}

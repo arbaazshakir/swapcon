@@ -1,0 +1,31 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Add Goal</h1>
+    <form action="" method="post" name="add_goal">
+        {{form.hidden_tag()}}
+        <p>
+            Goal Type: {{ form.goal_type() }}
+            {% for error in form.goal_type.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Goal Frequency: {{ form.goal_period() }}
+            {% for error in form.goal_period.errors %}
+                Hour: <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}<br>
+
+            Goal Target: {{ form.goal_target() }}
+            {% for error in form.goal_target.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Current Progress: {{ form.current_count() }}
+            {% for error in form.current_count.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+        <p><input type="submit" value="Add Goal"></p>
+    </form>
+
+{% endblock %}

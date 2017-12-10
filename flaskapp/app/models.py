@@ -1,7 +1,7 @@
 from app import db
-from datetime import datetime
+import datetime
 from hashlib import md5
-
+from dateutil.relativedelta import relativedelta
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -14,7 +14,9 @@ class User(db.Model):
     created = db.Column(db.DateTime())
     contacts = db.relationship('Contact', backref='user', order_by="Contact.id", lazy='dynamic')
     tasks = db.relationship('Task', backref='user', order_by="Task.id",lazy='dynamic')
-    #profile_image_url = db.Column(db.String(400))
+    profile_image_url = db.Column(db.String(400))
+    primary_goal = db.Column(db.String(64)) #get_job, meet_people, find_mentor
+    goals = db.relationship('Goal', backref='user', order_by="Goal.order", lazy='dynamic')
 
     @property
     def is_authenticated(self):
@@ -40,18 +42,36 @@ class User(db.Model):
         "tasks" : self.tasks
         }
         
+    def get_primary_goal_text(self):
+        mapping = {
+        'get_job' : 'Get a Job',
+        'meet_people' : 'Meet People',
+        'find_mentor' : 'Find a Mentor'
+        }
+        if self.primary_goal in mapping:
+            return mapping[self.primary_goal]
+        return self.primary_goal
+
+    def get_active_subgoal_text_list(self):
+        active_goals = [g for g in self.goals if g.is_active]
+
+
     def __repr__(self):
         return '<User %r>' % (self.email)
 
-
-    def __init__(self, email, password, fn, ln):
+    default_image_url = "https://media.licdn.com/mpr/mpr/shrinknp_200_200/p/3/000/0f0/09c/143d675.jpg"
+    def __init__(self, email, password, fn, ln, img_url=default_image_url, primary_goal='get_job'):
         self.email = email
         self.password = password
         self.first_name = fn
         self.last_name = ln
         self.contacts = {}
         self.tasks = {}
-        self.created = datetime.now()
+        self.created = datetime.datetime.now()
+        if img_url==None:
+            img_url=default_image_url
+        self.profile_image_url = img_url
+        self.primary_goal = primary_goal
 
 #NOT A DATABASE CLASS (YET)
 # class Task():
@@ -191,23 +211,87 @@ class Contact(db.Model):
         self.linkedin_url = linkedin_url
         self.notes = notes
 
+class Goal(db.Model):
+    __tablename__ = "goals"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    goal_type = db.Column(db.String(64)) # messages, new contacts, meetings, events
+    goal_period = db.Column(db.String(64)) # day, week, month, completion
+    goal_target = db.Column(db.Integer)
+    current_count = db.Column(db.Integer) #current count for period
+    next_period_start = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean) #shows up on profile or not
+    order = db.Column(db.Integer) #order preference to be displayed in, HIGHER is on TOP
 
-# class Conversation(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     convo_type = db.Column(db.String(140))
-#     timestamp = db.Column(db.DateTime)
-#     method = db.Column(db.String(140))
-#     contact_id = db.Column(db.Integer, db.ForeignKey('contact.id'))
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-#     body = db.Column(db.String(5000))
+    def edit_url(self):
+        return "/goals/{id}/edit".format(id=self.id)
 
-#     def __repr__(self):
-#         return """ Convo - {convo_type}
-#         {body}
-#         ---
-#         Method: {method}
-#         Date: {timestamp}
-#         """.format(task_type=task_type, 
-#             body=body, 
-#             method=method, 
-#             timestamp=timestamp)
+    def __init__(self, user_id, goal_type, goal_period, goal_target, current_count=0, 
+        next_period_start=None, is_active=True, order=None):
+        self.user_id = user_id
+        self.goal_type = goal_type
+        self.goal_period = goal_period
+        self.goal_target = goal_target
+        self.current_count = current_count
+        if next_period_start == None and goal_period != 'completion':
+            now = datetime.datetime.now()
+            if goal_period == 'day':
+                td = datetime.timedelta(days=1)
+            elif goal_period == 'week':
+                td = datetime.timedelta(days=7)
+            else: # goal_period == 'month':
+                td = relativedelta(months=1)
+            self.next_period_start=now+td
+        self.is_active = is_active
+        if order == None:
+            order = self.id
+        self.order=order
+
+    def __repr__(self):
+        output = ""
+        dateStr = self.next_period_start.strftime("%b %d (%a) at %I%p")
+        if self.goal_period == 'completion':
+            periodStr = 'total (to completion)'
+        else:
+            periodStr = 'per '+self.goal_period
+
+        if self.is_active:
+            activeStr = '[ACTIVE: {c} Completed]'.format(c=self.current_count)
+        else:
+            activeStr = '[DONE]'
+
+        if 'message' in self.goal_type:
+            output = "Message {target} people by {date} {period} {active}".format(
+                target=self.goal_target,
+                date=dateStr,
+                period=periodStr,
+                active=activeStr)
+
+        elif 'contact' in self.goal_type:
+            output = "Make {target} contacts by {date} {period} {active}".format(
+                target=self.goal_target,
+                date=dateStr,
+                period=periodStr,
+                active=activeStr)
+        elif 'meet' in self.goal_type:
+            output = "Go to {target} meetings by {date} {period} {active}".format(
+                target=self.goal_target,
+                date=dateStr,
+                period=periodStr,
+                active=activeStr)
+        elif 'event' in self.goal_type :
+            output = "Go to {target} events by {date} {period} {active}".format(
+                target=self.goal_target,
+                date=dateStr,
+                period=periodStr,
+                active=activeStr)
+        else:
+            output = "{goal}  - {current}/{target} - Do by {date} {period}".format(
+                goal=self.goal_type,
+                current=self.current_count,
+                target=self.goal_target,
+                date=dateStr,
+                period=periodStr,
+                active=activeStr)
+
+        return output

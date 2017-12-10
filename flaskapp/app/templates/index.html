@@ -2,10 +2,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div style="background-color: #6A6A6A">
-    <img src="https://media.licdn.com/mpr/mpr/shrinknp_200_200/p/3/000/0f0/09c/143d675.jpg" alt='profile'><!-- add user profile image here -->
+    <img src="{{user.profile_image_url}}" alt='profile' style="width: 100px; border-radius: 50px; float: right">
     <h1>Hi, {{ user.first_name }}!</h1>
-    <p>{{user.get_info()}}</p>
+    <h3>Goal: {{ user.get_primary_goal_text() }}</h3>
+    <ul>
+    {% for goal in goals %}
+        {% if goal.is_active %}
+            <li>{{goal.__repr__()|safe}}</li>
+        {% endif %}    
+    {% endfor %}
+    </ul>
     <h3>Upcoming Tasks</h3>
     {% if num_tasks == 0 %}
     	<p>You're all caught up!</p>
@@ -18,5 +24,4 @@
         <p>{{task.__repr__()|safe}}</p>
     {% endfor %}
     [ <a href="add_task">Add Task</a> | <a href="add_contact">Add Contact</a> ]
-    </div>
 {% endblock %}

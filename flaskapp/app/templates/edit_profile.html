@@ -1,0 +1,33 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Edit Profile</h1>
+    <img src="{{user.profile_image_url}}" alt='profile' style="size: 100">
+    <h3>Your Profile</h3>
+    <form action="" method="post" name="edit_profile">
+        {{ form.hidden_tag() }}
+        <p>
+            First Name: {{ form.first_name(size=80) }}
+            {% for error in form.first_name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Last Name: {{ form.last_name(size=80) }}
+            {% for error in form.last_name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Profile Image URL: {{ form.profile_image_url(size=80) }}
+            {% for error in form.profile_image_url.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Primary Goal: {{ form.primary_goal }}
+            {% for error in form.primary_goal.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+        <p><input type="submit" value="Update Profile"></p>
+    </form>
+{% endblock %}

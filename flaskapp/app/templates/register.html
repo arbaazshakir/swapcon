@@ -32,6 +32,16 @@
                 <span style="color: red;">[{{ error }}]</span>
             {% endfor %}<br>
 
+            Profile Image URL: {{ form.profile_image_url(size=80) }}
+            {% for error in form.profile_image_url.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Primary Goal: {{ form.primary_goal }}
+            {% for error in form.primary_goal.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
             I accept the terms and conditions, hereby selling my soul to Ken Singer: {{ form.accept_tos(size=80) }}
             {% for error in form.accept_tos.errors %}
                 <span style="color: red;">[{{ error }}]</span>

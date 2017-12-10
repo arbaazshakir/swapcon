@@ -1,0 +1,18 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Your Goals</h1>
+    <p>Primary Goal: {{user.get_primary_goal_text()}}</p>
+    <p>Sub Goals: 
+    <ul>
+    {% for goal in goals %}
+        {% if goal.is_active %}
+            <li>{{goal.__repr__()|safe}} <a href="/goals/{{goal.id}}/edit">(Edit)</a></li>
+        {% endif %}    
+    {% endfor %}
+    <li><a href="/goals/add">Add Goal</a></li>
+    </ul>
+
+    </p>
+{% endblock %}
