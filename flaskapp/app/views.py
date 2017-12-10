@@ -17,8 +17,8 @@ def index():
     user = current_user
     tasks = user.get_info()['tasks']
     active_tasks = []
-    for task in tasks:
-      if task.is_active:
+    for task in tasks.values():
+      if not task.is_done:
         active_tasks.append(task)
 
     return render_template('index.html',
@@ -121,32 +121,32 @@ def add_task():
 
   if request.method == 'POST' and form.validate():
     date = form.due_date.data
-    hour = form.due_time_hour.data + 12*form.due_date_ampm.data
+    hour = form.due_time_hour.data + 12*form.due_time_ampm.data
     minute = form.due_time_minute.data
-    due_date = datatime.datatime(date.year,date.month,date.day, hour, minute)
+    due_date = datetime.datetime(date.year,date.month,date.day, hour, minute)
 
     task_type = form.task_type.data
     body = form.body.data
-    rel_contact = form.relevant_contact.data
-    rel_contact_id = -1
+    rel_contact_id = form.relevant_contact.data
     rel_contact_name = ""
-    if 'None' not in rel_contact:
-      rel_contact_id = int(rel_contact.split("-")[0])
+    if rel_contact_id != -1:
       rel_contact_name = current_user.contacts[rel_contact_id].full_name()
 
-    newTask = Task(task_type, due_date, body, isDone=False, 
+    newTask = Task(task_type, due_date, body, is_done=False, 
       contact_id=rel_contact_id, contact_name=rel_contact_name)
     
     ids = list(current_user.tasks.keys())
     ids.append(-1) #in case no tasks exist
     task_id = max(ids)+1
     newTask.task_id = task_id
-    current_user.tasks[task_id] = newTask
+    tempDict = current_user.tasks.copy()
+    tempDict[task_id] = newTask
     
-    current_user.tasks = dict(current_user.tasks)
+    current_user.tasks = tempDict
     db.session.commit()
     
     flash("Task added successfully")
+    return redirect(url_for('index'))
   return render_template('add_task.html',
                         title='Add Task',
                         user=current_user,
