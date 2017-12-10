@@ -1,5 +1,6 @@
-from flask_wtf import Form
 from wtforms import *
+from flask_wtf import Form
+
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, Optional, URL
 import datetime
