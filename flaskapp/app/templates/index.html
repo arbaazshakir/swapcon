@@ -1,0 +1,8 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hi, {{ user.first_name }}!</h1>
+    <p>{{user.get_info()}}</p>
+    [ <a href="add_task">Add Task</a> | <a href="add_contact">Add Contact</a> ]
+{% endblock %}

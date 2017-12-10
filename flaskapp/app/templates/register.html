@@ -1,0 +1,42 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Register</h1>
+    <form action="" method="post" name="register">
+        {{ form.hidden_tag() }}
+        <p>
+            Please enter your email and password:<br>
+            Email: {{ form.email(size=80) }}
+            {% for error in form.email.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Password: {{ form.password(size=80) }}
+            {% for error in form.password.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Confirm Password: {{ form.confirm(size=80) }}
+            {% for error in form.confirm.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            First Name: {{ form.first_name(size=80) }}
+            {% for error in form.first_name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Last Name: {{ form.last_name(size=80) }}
+            {% for error in form.last_name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            I accept the terms and conditions, hereby selling my soul to Ken Singer: {{ form.accept_tos(size=80) }}
+            {% for error in form.accept_tos.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+        <p><input type="submit" value="Register"></p>
+    </form>
+{% endblock %}

@@ -1,0 +1,23 @@
+<html>
+  <head>
+    {% if title %}
+    <title>{{ title }} - Xelerator</title>
+    {% else %}
+    <title>Xelerator</title>
+    {% endif %}
+  </head>
+  <body>
+    <div>Xelerator: <a href="/index">Home</a> | <a href="/register">Register a new account</a> | <a href="contacts">Contacts</a> | <a href='tasks'>Tasks</a> | <a href="add_contact"> Add Contact</a> | <a href="/logout">Log Out</a> </div>
+    <hr>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+    {% for message in messages %}
+        <li>{{ message }} </li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </body>
+</html>

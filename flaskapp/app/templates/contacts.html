@@ -1,0 +1,27 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hi, {{ user.first_name }}!</h1>
+    {% if not user.contacts %}
+    	<p>You don't have any contacts yet. Add some!</p>
+    {% endif %}
+    {% for contact in contacts %}
+    	<p>
+    	Name: {{contact.first_name}} {{contact.last_name}}<br>
+    	{% if contact.phone %}
+    		Phone: {{contact.phone}} <br>
+    	{% endif %}
+    	{% if contact.email %}
+    		Email: {{contact.email}} <br>
+    	{% endif %}
+    	{% if contact.linkedin_url %}
+    		LinkedIn: {{contact.linkedin_url}} <br>
+    	{% endif %}
+    	</p>
+    	<a href={{contact.get_url()}}> View Contact</a>
+    	<br>-----<br>
+    {% endfor %}
+    <br>-----<br>
+    <a href="add_contact">Add Contact</a>
+{% endblock %}

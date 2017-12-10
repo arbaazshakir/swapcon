@@ -1,0 +1,35 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Add Contact</h1>
+    <form action="" method="post" name="add_contact">
+        {{ form.hidden_tag() }}
+        <p>
+            First Name: {{ form.first_name(size=80) }}
+            {% for error in form.first_name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Last Name: {{ form.last_name(size=80) }}
+            {% for error in form.last_name.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Phone: {{ form.phone(size=80) }}
+            {% for error in form.phone.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Email: {{ form.email(size=80) }}
+            {% for error in form.email.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            LinkedIn Url: {{ form.linkedin_url(size=80) }}
+            {% for error in form.linkedin_url.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+        <p><input type="submit" value="Add Contact"></p>
+    </form>
+{% endblock %}
