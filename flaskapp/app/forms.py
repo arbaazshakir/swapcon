@@ -52,4 +52,4 @@ class TaskForm(Form):
     task_choices = [(x, x) for x in task_types]
     task_type = SelectField('task_type', coerce=str, choices=task_choices, default='message')
     body = TextAreaField("Notes")
-    relevant_contact = SelectField('contact', coerce=int, choices=[(-1, "None / NA")], default=-1)
+    relevant_contact = SelectField('contact', coerce=int, choices=[(-1, "None / NA")], validators=[Optional()])

@@ -145,21 +145,24 @@ def edit_contact(contact_id):
 @app.route('/tasks')
 @login_required
 def tasks():
-  keys = sorted(current_user.tasks.keys(), reverse=True)
-  result = [current_user.tasks[key] for key in keys]
-  return render_template('tasks.html', user=current_user, tasks=result)
+  if current_user.tasks:
+    result = list(current_user.tasks)
+  else:
+    result = []
+  return render_template('tasks.html', user=current_user, tasks=result,
+    num_tasks=len(result))
+
+
 
 @app.route('/add_task', methods=['GET','POST'])
 @login_required
 def add_task():
   contact_list = [(-1,"None / NA")]
-  for key in current_user.contacts.keys():
-    contact = current_user.contacts[key]
-    option_str = "{id} - {name}".format(id=str(key), name=contact.full_name())
-    contact_list.append((int(key), option_str))
+  for contact in current_user.contacts:
+    option_str = "{name}".format(name=contact.full_name())
+    contact_list.append((int(contact.id), option_str))
   form=TaskForm()
   form.relevant_contact.choices=contact_list
-
   if request.method == 'POST' and form.validate():
     date = form.due_date.data
     hour = form.due_time_hour.data + 12*form.due_time_ampm.data
@@ -171,24 +174,56 @@ def add_task():
     rel_contact_id = form.relevant_contact.data
     rel_contact_name = ""
     if rel_contact_id != -1:
-      rel_contact_name = current_user.contacts[rel_contact_id].full_name()
+      rel_contact_name = Contact.query.get(int(rel_contact_id)).full_name()
 
-    newTask = Task(task_type, due_date, body, is_done=False, 
+    newTask = Task(task_type, due_date, body, current_user.id, is_done=False, 
       contact_id=rel_contact_id, contact_name=rel_contact_name)
     
-    ids = list(current_user.tasks.keys())
-    ids.append(-1) #in case no tasks exist
-    task_id = max(ids)+1
-    newTask.task_id = task_id
-    tempDict = current_user.tasks.copy()
-    tempDict[task_id] = newTask
-    
-    current_user.tasks = tempDict
+    db.session.add(newTask)
     db.session.commit()
     
     flash("Task added successfully")
-    return redirect(url_for('index'))
+    return redirect(url_for('tasks'))
   return render_template('add_task.html',
                         title='Add Task',
                         user=current_user,
                         form=form) 
+
+@app.route('/tasks/<task_id>')
+@login_required
+def view_task(task_id):
+  return redirect(url_for('tasks'))
+
+
+@app.route('/tasks/<task_id>/edit', methods=['GET','POST'])
+@login_required
+def edit_task(task_id):
+  task = Task.query.get(int(task_id))
+  contact_list = [(-1,"None / NA")]
+  for contact in current_user.contacts:
+    option_str = "{name}".format(name=contact.full_name())
+    contact_list.append((int(contact.id), option_str))
+  form = TaskForm()
+  form.relevant_contact.choices=contact_list
+  if request.method == 'POST' and form.validate():
+    date = form.due_date.data
+    hour = form.due_time_hour.data + 12*form.due_time_ampm.data
+    minute = form.due_time_minute.data
+    task.due_date = datetime.datetime(date.year,date.month,date.day, hour, minute)
+
+    task.task_type = form.task_type.data
+    task.body = form.body.data
+    task.contact_id = int(form.relevant_contact.data)
+    if task.contact_id != -1:
+      task.contact_name = Contact.query.get(task.contact_id).full_name()
+    db.session.commit()
+    flash("Task updated successfully")
+    return redirect(url_for('tasks'))
+  form.due_date.data = task.due_date
+  form.task_type.data = task.task_type
+  form.body.data = task.body
+  form.relevant_contact.data = task.contact_id
+  return render_template('edit_task.html',
+                        title='Edit Task',
+                        user=current_user,
+                        form=form)

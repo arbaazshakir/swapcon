@@ -1,0 +1,42 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Edit Task</h1>
+    <form action="" method="post" name="edit_task">
+        {{form.hidden_tag()}}
+        <p>
+            Due date: {{ form.due_date(class_='datepicker') }}
+            {% for error in form.due_date.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Due time: {{ form.due_time_hour }}:{{ form.due_time_minute}} {{form.due_time_ampm}}
+            {% for error in form.due_time_hour.errors %}
+                Hour: <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %} 
+            {% for error in form.due_time_minute.errors %}
+                Minute: <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %} 
+            {% for error in form.due_time_ampm.errors %}
+                AM/PM: <span style="color: red;">[{{ error }}]</span>
+            {% endfor %} <br>
+
+            Task Type: {{ form.task_type() }}
+            {% for error in form.task_type.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Relevant Contact: {{ form.relevant_contact() }}
+            {% for error in form.relevant_contact.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+
+            Notes: {{ form.body(size=80) }}
+            {% for error in form.body.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
+        <p><input type="submit" value="Update Task"></p>
+    </form>
+
+{% endblock %}

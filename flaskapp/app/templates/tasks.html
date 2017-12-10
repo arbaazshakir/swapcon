@@ -3,12 +3,19 @@
 
 {% block content %}
     <h1>Hi, {{ user.first_name }}!</h1>
-    {% if not user.tasks %}
+    {% if num_tasks == 0 %}
     	<p>You don't have any contacts yet. Add some!</p>
+    {% endif %}
+    {% if num_tasks == 1 %}
+        <p>You have {{num_tasks}} task.</p>
+    {% endif %}
+    {% if num_tasks > 1 %}
+        <p>You have {{num_tasks}} tasks.</p>
     {% endif %}
     {% for task in tasks %}
     	<p>
     	{{task.__repr__()|safe}}
+        <a href={{task.get_edit_url()}}>Edit Task</a>
     	</p>
     	<br>-----<br>
     {% endfor %}

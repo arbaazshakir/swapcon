@@ -100,15 +100,41 @@ class Task(db.Model):
     
 
     def __repr__(self):
-        return """ Task - {task_type}
-        {body}
-        ---
-        Completed: {is_done}
-        Due Date: {due_date}
-        """.format(task_type=task_type, 
-            body=body, 
-            is_done=str(is_done), 
-            due_date=str(due_date))
+        contact_link = ""
+        if self.contact_id != -1:
+            contact_link = "<a href='/contacts/{cid}'>View Contact</a>".format(cid=self.contact_id)
+
+        return """ <p>Task - {task_type} <br>
+        {body} <br>
+        ---<br>
+        Completed: {is_done} <br>
+        Due Date: {due_date} <br></p> {extra}
+        """.format(task_type=self.task_type, 
+            body=self.body, 
+            is_done=str(self.is_done), 
+            due_date=str(self.due_date),
+            extra=contact_link)
+
+    def get_edit_url(self):
+        return '/tasks/{id}/edit'.format(id=self.id)
+
+    def __init__(self, task_type, due_date, body, user_id, is_done=False, contact_id=-1,
+        contact_name=""):
+        #task_type - string indicating one of the following:
+        ## message, meeting, event, find_events, find_contacts, self_reminder
+
+        #due_date - datetime object for when task is due / happening
+        #body - string that describes the task
+        #is_active - True when before completion of task 
+
+        self.task_type = task_type
+        self.due_date = due_date
+        self.body = body
+        self.user_id = user_id
+        self.is_done = is_done
+        self.contact_id = contact_id # -1 indicates no contact associated with task
+        self.contact_name = contact_name # Empty str if no contact associated
+
 
 #NOT A DATABASE CLASS (YET)
 # class Contact():
