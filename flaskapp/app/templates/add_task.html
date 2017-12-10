@@ -4,6 +4,7 @@
 {% block content %}
     <h1>Add Task</h1>
     <form action="" method="post" name="add_task">
+        {{form.hidden_tag()}}
         <p>
             Due date: {{ form.due_date(class_='datepicker') }}
             {% for error in form.due_date.errors %}
@@ -12,13 +13,13 @@
 
             Due time: {{ form.due_time_hour }}:{{ form.due_time_minute}} {{form.due_time_ampm}}
             {% for error in form.due_time_hour.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
+                Hour: <span style="color: red;">[{{ error }}]</span><br>
             {% endfor %} 
             {% for error in form.due_time_minute.errors %}
-                <span style="color: red;">[{{ error }}]</span><br>
+                Minute: <span style="color: red;">[{{ error }}]</span><br>
             {% endfor %} 
             {% for error in form.due_time_ampm.errors %}
-                <span style="color: red;">[{{ error }}]</span>
+                AM/PM: <span style="color: red;">[{{ error }}]</span>
             {% endfor %} <br>
 
             Task Type: {{ form.task_type() }}

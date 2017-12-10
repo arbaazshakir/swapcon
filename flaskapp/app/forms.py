@@ -1,5 +1,5 @@
-from flask_wtf import Form
 from wtforms import *
+from flask_wtf import Form
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, Optional, URL
 import datetime
@@ -31,15 +31,17 @@ class ContactForm(Form):
     #Todo add note with TextAreaField!!!
 
 class TaskForm(Form):
-    due_date = DateField('due_date', validators=[DataRequired()], format='%Y-%m-%d', default=datetime.datetime.today())
+    due_date = DateField('due_date', format='%Y-%m-%d', default=datetime.datetime.today())
     due_times_hour = [(0, '12:00'),(1, '1:00'), (2, '2:00'), (3, '3:00'), (4, '4:00'), (5, '5:00'), (6, '6:00'), (
 7, '7:00'), (8, '8:00'), (9, '9:00'), (10, '10:00'), (11, '11:00')]
-    due_time_hour = SelectField('due_time_hour', validators=[DataRequired()], choices=due_times_hour)
-    due_time_ampm = SelectField('due_time_ampm', validators=[DataRequired()], choices=[(0,'AM'),(1,'PM')]) 
+
+    due_time_hour = SelectField('due_time_hour',coerce=int, choices=due_times_hour, default=datetime.datetime.now().hour%12)
+    due_time_ampm = SelectField('due_time_ampm',coerce=int, choices=[(0,'AM'),(1,'PM')], default=int(datetime.datetime.now().hour>12)) 
     due_times_minute = [(x, str(x)) for x in range(0,60,5)]
-    due_time_minute = SelectField('due_time_minute', validators=[DataRequired()], choices=due_times_minute)
+
+    due_time_minute = SelectField('due_time_minute', coerce=int, choices=due_times_minute,default=0)
     task_types = ['message', 'meeting', 'event', 'find_events', 'find_contacts', 'self_reminder']
     task_choices = [(x, x) for x in task_types]
-    task_type = SelectField('task_type',choices=task_choices, validators=[DataRequired()])
-    body = TextAreaField("Notes", validators=[DataRequired()])
-    relevant_contact = SelectField('contact', choices=[(-1, "None / NA")], validators=[DataRequired()])
+    task_type = SelectField('task_type', coerce=str, choices=task_choices, default='message')
+    body = TextAreaField("Notes")
+    relevant_contact = SelectField('contact', coerce=int, choices=[(-1, "None / NA")], default=-1)
