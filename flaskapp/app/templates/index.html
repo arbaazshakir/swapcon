@@ -1,7 +1,9 @@
-whic<!-- extend base layout -->
+<!-- extend base layout -->
 {% extends "base.html" %}
 
 {% block content %}
+    <div style="background-color: #6A6A6A">
+    <img src="https://media.licdn.com/mpr/mpr/shrinknp_200_200/p/3/000/0f0/09c/143d675.jpg" alt='profile'><!-- add user profile image here -->
     <h1>Hi, {{ user.first_name }}!</h1>
     <p>{{user.get_info()}}</p>
     <h3>Upcoming Tasks</h3>
@@ -16,4 +18,5 @@ whic<!-- extend base layout -->
         <p>{{task.__repr__()|safe}}</p>
     {% endfor %}
     [ <a href="add_task">Add Task</a> | <a href="add_contact">Add Contact</a> ]
+    </div>
 {% endblock %}
