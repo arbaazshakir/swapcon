@@ -53,3 +53,4 @@ class TaskForm(Form):
     task_type = SelectField('task_type', coerce=str, choices=task_choices, default='message')
     body = TextAreaField("Notes")
     relevant_contact = SelectField('contact', coerce=int, choices=[(-1, "None / NA")], validators=[Optional()])
+    is_done = BooleanField('is_done')

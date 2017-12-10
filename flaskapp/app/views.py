@@ -7,6 +7,15 @@ from .models import User, Contact, Task
 import sqlalchemy
 from time import sleep
 
+def earliest_x_tasks(x, tasks):
+  #e.g. x=5, gets the first five
+  tasksByDate = sorted(tasks, key=lambda task: task.due_date)
+  return tasksByDate[:min(len(tasks),x)]
+
+def last_x_tasks(x, tasks):
+  tasksByDate = sorted(tasks, key=lambda task: task.due_date, reverse=True)
+  return tasksByDate[:min(len(tasks),x)]
+
 @lm.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -19,14 +28,22 @@ def index():
     user = current_user
     tasks = user.tasks
     active_tasks = []
+    inactive_tasks = []
     for task in tasks:
       if not task.is_done:
         active_tasks.append(task)
+      else:
+        inactive_tasks.append(task)
+    active_tasks = earliest_x_tasks(5, active_tasks)
+    inactive_tasks = last_x_tasks(5, inactive_tasks)
 
     return render_template('index.html',
                            title='Home',
                            user=user,
-                           active_tasks=active_tasks)
+                           active_tasks=active_tasks,
+                           num_tasks=len(active_tasks),
+                           inactive_tasks=inactive_tasks,
+                           num_inactive_tasks=len(inactive_tasks))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -106,11 +123,15 @@ def add_contact():
 @login_required
 def get_contact(contact_id):
   c = Contact.query.get(int(contact_id))
+  tasks_with_c = Task.query.filter_by(contact_id=int(contact_id)).all()
+  num_tasks = len(tasks_with_c)
   if c:
     return render_template('contact.html',
                           title='View Contact',
                           user=current_user,
-                          contact=c)
+                          contact=c,
+                          tasks=tasks_with_c,
+                          num_tasks=num_tasks)
   flash("Invalid contact!")
   return "Invalid contact!"
 
@@ -176,7 +197,9 @@ def add_task():
     if rel_contact_id != -1:
       rel_contact_name = Contact.query.get(int(rel_contact_id)).full_name()
 
-    newTask = Task(task_type, due_date, body, current_user.id, is_done=False, 
+    is_done = form.is_done.data
+
+    newTask = Task(task_type, due_date, body, current_user.id, is_done=is_done, 
       contact_id=rel_contact_id, contact_name=rel_contact_name)
     
     db.session.add(newTask)
@@ -216,6 +239,7 @@ def edit_task(task_id):
     task.contact_id = int(form.relevant_contact.data)
     if task.contact_id != -1:
       task.contact_name = Contact.query.get(task.contact_id).full_name()
+    task.is_done = form.is_done.data
     db.session.commit()
     flash("Task updated successfully")
     return redirect(url_for('tasks'))
@@ -223,6 +247,7 @@ def edit_task(task_id):
   form.task_type.data = task.task_type
   form.body.data = task.body
   form.relevant_contact.data = task.contact_id
+  form.is_done.data = task.is_done
   return render_template('edit_task.html',
                         title='Edit Task',
                         user=current_user,

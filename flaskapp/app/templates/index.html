@@ -4,5 +4,16 @@ whic<!-- extend base layout -->
 {% block content %}
     <h1>Hi, {{ user.first_name }}!</h1>
     <p>{{user.get_info()}}</p>
+    <h3>Upcoming Tasks</h3>
+    {% if num_tasks == 0 %}
+    	<p>You're all caught up!</p>
+    {% endif %}
+    {% for task in active_tasks %}
+    	<p>{{task.__repr__()|safe}}</p>
+    {% endfor %}
+    <h3>Recently Completed Tasks</h3>
+    {% for task in inactive_tasks %}
+        <p>{{task.__repr__()|safe}}</p>
+    {% endfor %}
     [ <a href="add_task">Add Task</a> | <a href="add_contact">Add Contact</a> ]
 {% endblock %}

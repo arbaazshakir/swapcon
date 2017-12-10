@@ -14,4 +14,8 @@
         </p>
         <a href="/contacts/{{contact.id}}/edit">Edit Contact</a>
     </form>
+    <p>You have {{num_tasks}} tasks with this person</p>
+    {% for task in tasks %}
+        <p>{{task.__repr__()|safe}}</p>
+    {% endfor %}
 {% endblock %}

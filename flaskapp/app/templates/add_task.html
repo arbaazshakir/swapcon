@@ -36,6 +36,11 @@
             {% for error in form.body.errors %}
                 <span style="color: red;">[{{ error }}]</span>
             {% endfor %}<br>
+
+            Task is completed: {{ form.is_done(size=80) }}
+            {% for error in form.is_done.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}<br>
         <p><input type="submit" value="Add Task"></p>
     </form>
 

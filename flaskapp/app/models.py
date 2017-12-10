@@ -100,10 +100,10 @@ class Task(db.Model):
     
 
     def __repr__(self):
-        contact_link = ""
+        extra = "<a href='/tasks/{id}/edit'>Edit Task</a>".format(id=self.id)
         if self.contact_id != -1:
-            contact_link = "<a href='/contacts/{cid}'>View Contact</a>".format(cid=self.contact_id)
-
+            extra += " | <a href='/contacts/{cid}'>View Contact</a>".format(cid=self.contact_id)
+        
         return """ <p>Task - {task_type} <br>
         {body} <br>
         ---<br>
@@ -113,7 +113,7 @@ class Task(db.Model):
             body=self.body, 
             is_done=str(self.is_done), 
             due_date=str(self.due_date),
-            extra=contact_link)
+            extra=extra)
 
     def get_edit_url(self):
         return '/tasks/{id}/edit'.format(id=self.id)
