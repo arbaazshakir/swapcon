@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Add Contact</h1>
+    <h1>Edit Contact</h1>
     <form action="" method="post" name="add_contact">
         {{ form.hidden_tag() }}
         <p>
@@ -35,6 +35,6 @@
             {% for error in form.notes.errors %}
                 <span style="color: red;">[{{ error }}]</span>
             {% endfor %}<br>
-        <p><input type="submit" value="Add Contact"></p>
+        <p><input type="submit" value="Update Contact"></p>
     </form>
 {% endblock %}

@@ -4,6 +4,8 @@ from flask_login import login_user, logout_user, current_user, login_required
 from app import app, db, lm
 from .forms import *
 from .models import User, Contact, Task
+import sqlalchemy
+from time import sleep
 
 @lm.user_loader
 def load_user(id):
@@ -59,7 +61,9 @@ def register():
         existingUser = User.query.filter_by(email=form.email.data).first()
         if not existingUser:
           user = User(form.email.data,
-                      form.password.data)
+                      form.password.data,
+                      form.first_name.data,
+                      form.last_name.data)
           db.session.add(user)
           db.session.commit()
           flash('Thanks for registering')
@@ -71,8 +75,11 @@ def register():
 @app.route('/contacts', methods=['GET'])
 @login_required
 def contacts():
-  keys = sorted(current_user.contacts.keys(), reverse=True)
-  result = [current_user.contacts[key] for key in keys]
+  if current_user.contacts:
+    keys = sorted(current_user.contacts.keys(), reverse=True)
+    result = [current_user.contacts[key] for key in keys]
+  else:
+    result = []
   return render_template('contacts.html', user=current_user, contacts=result)
 
 @app.route('/add_contact', methods=['GET', 'POST'])
@@ -85,14 +92,17 @@ def add_contact():
                       form.last_name.data,
                       form.phone.data,
                       form.email.data,
-                      form.linkedin_url.data)
+                      form.linkedin_url.data,
+                      notes=form.notes.data)
     #SqlAlchemy requires writing a new object to update a pickled object!
     #-->Can't Modify data within to trigger an update
-    max_id = max(current_user.contacts.keys())
+    ids = list(current_user.contacts.keys())+[-1]
+    max_id = max(ids)
     tempContacts = dict(current_user.contacts)
     newContact.id = max_id+1
     tempContacts[max_id+1] = newContact
     current_user.contacts = tempContacts
+    db.session.add(current_user)
     db.session.commit()
     return redirect(url_for('contacts'))
   return render_template('add_contact.html',
@@ -102,11 +112,50 @@ def add_contact():
 @app.route('/contacts/<contact_id>')
 @login_required
 def get_contact(contact_id):
-  print("Fetch for contact id " +contact_id)
   if int(contact_id) in current_user.contacts:
-    print(current_user.contacts[int(contact_id)])
-    return "Valid contact! \n"+str(current_user.contacts[int(contact_id)])[1:-1]
+    return render_template('contact.html',
+                          title='View Contact',
+                          user=current_user,
+                          contact=current_user.contacts[int(contact_id)])
+  flash("Invalid contact!")
   return "Invalid contact!"
+
+@app.route('/contacts/<contact_id>/edit', methods=['GET','POST'])
+@login_required
+def edit_contact(contact_id):
+  c = current_user.contacts[int(contact_id)]
+  form = EditContactForm()
+  form.first_name.data = c.first_name
+  form.last_name.data = c.last_name
+  form.phone.data = c.phone
+  form.email.data = c.email
+  form.linkedin_url.data = c.linkedin_url
+  form.notes.data = c.notes
+  if request.method == 'POST' and form.validate():
+    tempContacts = current_user.contacts.copy()
+    updateC = Contact(form.first_name.data, form.last_name.data, phone=form.phone.data,
+      email=form.email.data, linkedin_url=form.linkedin_url.data, notes=form.notes.data,
+      events=c.events, idnum=int(contact_id))
+    
+    current_user.contacts = {}
+    db.session.execute(sqlalchemy.update(User).where(User.id == current_user.id).values(contacts={}))
+    db.session.commit()
+    tempContacts[int(contact_id)] = updateC
+    current_user.contacts = tempContacts
+    db.session.commit()
+    return redirect(url_for('contacts'))
+  return render_template('edit_contact.html',
+                          title='Edit Contact',
+                          user=current_user,
+                          contact=c,
+                          form=form)
+
+@app.route('/tasks')
+@login_required
+def tasks():
+  keys = sorted(current_user.tasks.keys(), reverse=True)
+  result = [current_user.tasks[key] for key in keys]
+  return render_template('tasks.html', user=current_user, tasks=result)
 
 @app.route('/add_task', methods=['GET','POST'])
 @login_required

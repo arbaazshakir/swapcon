@@ -7,9 +7,9 @@ class User(db.Model):
     last_name = db.Column(db.String(64))
     email = db.Column(db.String(120), index=True, unique=True)
     password = db.Column(db.String(64))
-    contacts = db.Column(db.PickleType) #dictionary
-    tasks = db.Column(db.PickleType) #dictionary
-
+    contacts = db.Column('contacts', db.PickleType(comparator=lambda *a: False)) #dictionary
+    tasks = db.Column('tasks', db.PickleType(comparator=lambda *a: False)) #dictionary
+    created = db.Column(db.DateTime())
     #Below is what we'd use if we were using a formal db structure.
     #Currently using pickled python dictionaries for simplicity.
     # contacts = db.relationship('Contact', backref='user_id', lazy='dynamic')
@@ -50,6 +50,7 @@ class User(db.Model):
         self.last_name = ln
         self.contacts = {}
         self.tasks = {}
+        self.created = datetime.now()
 
 #NOT A DATABASE CLASS (YET)
 class Task():
@@ -88,7 +89,7 @@ class Task():
 #NOT A DATABASE CLASS (YET)
 class Contact():
     def __init__(self, first_name, last_name, phone=None, email=None,
-      linkedin_url=None, notes="", events=[]):
+      linkedin_url=None, notes="", events=[], idnum=-1):
         self.first_name = first_name
         self.last_name = last_name
         self.phone = phone
@@ -96,7 +97,7 @@ class Contact():
         self.linkedin_url = linkedin_url
         self.notes = notes
         self.events = events
-        self.id = -1
+        self.id = idnum
 
     def __repr__(self):
         return '<Contact :'+self.first_name+" "+self.last_name+">"

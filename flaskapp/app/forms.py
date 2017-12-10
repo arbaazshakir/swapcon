@@ -27,8 +27,16 @@ class ContactForm(Form):
     last_name = StringField('last_name', validators=[DataRequired()])
     phone = StringField('Phone', validators=[Optional(), Length(min=7, max=20)])
     email = StringField('email', validators=[Optional(), Email(message=email_message)])
+    linkedin_url = StringField('linkedin_url', validators=[Optional()])
+    notes = TextAreaField("Notes")
+
+class EditContactForm(Form):
+    first_name = StringField('first_name', validators=[DataRequired()])
+    last_name = StringField('last_name', validators=[DataRequired()])
+    phone = StringField('Phone', validators=[Optional()])
+    email = StringField('email', validators=[Optional(), Email(message=email_message)])
     linkedin_url = StringField('linkedin_url', validators=[Optional(), URL(message=url_message)])
-    #Todo add note with TextAreaField!!!
+    notes = TextAreaField("Notes")
 
 class TaskForm(Form):
     due_date = DateField('due_date', format='%Y-%m-%d', default=datetime.datetime.today())

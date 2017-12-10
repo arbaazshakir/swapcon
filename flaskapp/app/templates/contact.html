@@ -1,0 +1,17 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>View Contact</h1>
+    <form action="" method="post" name="add_contact">
+        <p>
+            First Name: {{ contact.first_name }} <br>
+            Last Name: {{ contact.last_name }} <br>
+            Phone: {{ contact.phone }} <br>
+            Email: {{ contact.email }}<br>
+            LinkedIn Url: {{ contact.linkedin_url }} <br>
+            Notes: {{ contact.notes }} <br>
+        </p>
+        <a href="/contacts/{{contact.id}}/edit">Edit Contact</a>
+    </form>
+{% endblock %}

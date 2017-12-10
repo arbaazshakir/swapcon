@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Hi, {{ user.first_name }}!</h1>
+    <h1>Your Contacts</h1>
     {% if not user.contacts %}
     	<p>You don't have any contacts yet. Add some!</p>
     {% endif %}
