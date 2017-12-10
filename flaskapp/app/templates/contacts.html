@@ -3,7 +3,7 @@
 
 {% block content %}
     <h1>Your Contacts</h1>
-    {% if not user.contacts %}
+    {% if num_contacts == 0 %}
     	<p>You don't have any contacts yet. Add some!</p>
     {% endif %}
     {% for contact in contacts %}
