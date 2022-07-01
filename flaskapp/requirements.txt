@@ -98,7 +98,7 @@ numpy==1.11.3
 numpydoc==0.6.0
 odo==0.5.0
 okpy==1.13.9
-openpyxl==2.4.1
+openpyxl==2.4.2
 pandas==0.19.2
 partd==0.3.7
 path.py==0.0.0
